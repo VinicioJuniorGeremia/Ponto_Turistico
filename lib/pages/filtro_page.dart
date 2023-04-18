@@ -1,34 +1,41 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
-import '../model/tarefa.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../model/tarefa.dart';
 
 
 class FiltroPage extends StatefulWidget{
-  static const routeName = '/filtro_visualizar';
-  static const chaveCampoDescricao = 'campoDescricao';
+  static const routeName = '/filtro';
   static const chaveCampoOrdenacao = 'campoOrdenacao';
   static const chaveUsarOrdemDecrescente = 'usarOrdemDecrescente';
+  static const chaveCampoDescricao = 'campoDescricao';
+  static const chaveCampoDiferenciais = 'campoDiferenciais';
+  static const chaveCampoDetalhes = 'campoDetalhes';
+
 
   @override
   _FiltroPageState createState() => _FiltroPageState();
-}
 
+
+}
 class _FiltroPageState extends State<FiltroPage> {
 
-
   final _camposParaOrdenacao = {
-
-    Tarefa.CAMPO_NOME: 'Nome',
-    Tarefa.CAMPO_DATA_INCLUSAO: 'Data inclusão',
+    Tarefa.campoId: 'Código',
+    Tarefa.campoDescricao: 'Descrição',
+    Tarefa.campoDiferenciais: 'Diferenciais',
+    Tarefa.campoDetalhes: 'Detalhes',
+    Tarefa.campoPrazo: 'Prazo'
   };
 
 
   late final SharedPreferences _prefes;
   final _descricaoController = TextEditingController();
-  String _campoOrdenacao = Tarefa.CAMPO_ID;
-  bool _alterouValores = false;
+  final _diferenciaisController = TextEditingController();
+  final _detalhesController = TextEditingController();
+  String _campoOrdenacao = Tarefa.campoId;
   bool _usarOrdemDecrescente = false;
+  bool _alterouValores = false;
 
 
   @override
@@ -41,9 +48,11 @@ class _FiltroPageState extends State<FiltroPage> {
   void _carregaDadosSharedPreferences() async {
     _prefes = await SharedPreferences.getInstance();
     setState(() {
-      _campoOrdenacao = _prefes.getString(FiltroPage.chaveCampoOrdenacao) ?? Tarefa.CAMPO_ID;
-      _descricaoController.text = _prefes.getString(FiltroPage.chaveCampoDescricao) ?? '' ;
+      _campoOrdenacao = _prefes.getString(FiltroPage.chaveCampoOrdenacao) ?? Tarefa.campoId;
       _usarOrdemDecrescente = _prefes.getBool(FiltroPage.chaveUsarOrdemDecrescente) == true;
+      _descricaoController.text = _prefes.getString(FiltroPage.chaveCampoDescricao) ?? '' ;
+      _diferenciaisController.text = _prefes.getString(FiltroPage.chaveCampoDiferenciais) ?? '' ;
+      _detalhesController.text = _prefes.getString(FiltroPage.chaveCampoDetalhes) ?? '' ;
     });
   }
 
@@ -52,7 +61,7 @@ class _FiltroPageState extends State<FiltroPage> {
   Widget build(BuildContext context){
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(title: Text('Filtro e ordenação'),
+        appBar: AppBar(title: Text('Filtro e Ordenação'),
         ),
         body: _criarBody(),
       ),
@@ -66,7 +75,7 @@ class _FiltroPageState extends State<FiltroPage> {
       children: [
         Padding(
           padding: EdgeInsets.only(left: 10, top: 10),
-          child: Text('Campos para ordenação'),
+          child: Text('Campos para Ordenação'),
         ),
         for (final campo in _camposParaOrdenacao.keys)
           Row(
@@ -94,7 +103,7 @@ class _FiltroPageState extends State<FiltroPage> {
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: TextField(
             decoration: InputDecoration(
-              labelText: 'Descrição começa com: ',
+              labelText: 'Descrição começa com:',
             ),
             controller: _descricaoController ,
             onChanged: _onFiltroDescricaoChanged,
@@ -122,7 +131,6 @@ class _FiltroPageState extends State<FiltroPage> {
     });
   }
 
-
   void _onFiltroDescricaoChanged(String? valor){
     _prefes.setString(FiltroPage.chaveCampoDescricao, valor!);
     _alterouValores = true;
@@ -133,6 +141,10 @@ class _FiltroPageState extends State<FiltroPage> {
     Navigator.of(context).pop(_alterouValores);
     return true;
   }
+
 }
 ///fim
+
+
+
 

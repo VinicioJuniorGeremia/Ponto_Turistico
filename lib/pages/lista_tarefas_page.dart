@@ -1,24 +1,34 @@
-import 'package:gerenciador_tarefas_md/pages/filtro_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'conteudo_form_dialog.dart';
-import 'package:gerenciador_tarefas_md/model/tarefa.dart';
+import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../dao/tarefa_dao.dart';
+import '../model/tarefa.dart';
+import '../widgets/conteudo_form_dialog.dart';
+import 'detalhes_tarefa_page.dart';
+import 'filtro_page.dart';
 
 
-
-class ListaTarefaPage extends StatefulWidget {
+class ListaTarefasPage extends StatefulWidget {
   @override
-  _ListaTarefasPageState createState() => _ListaTarefasPageState();
+  State<StatefulWidget> createState() => _ListaTarefasPageState();
 }
 
 
-class _ListaTarefasPageState extends State<ListaTarefaPage> {
-  static const ACAO_VISUALIZAR = 'visualizar';
-  static const ACAO_EXCLUIR = 'excluir';
-  static const ACAO_EDITAR = 'editar';
+class _ListaTarefasPageState extends State<ListaTarefasPage> {
+  static const acaoEditar = 'editar';
+  static const acaoExcluir = 'excluir';
+  static const acaoVisualizar = 'visualizar';
 
-  final tarefas = <Tarefa>[];
-  var _ultimoId = 0;
+  final _tarefas = <Tarefa>[];
+  final _dao = TarefaDao();
+  var _carregando = false;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _atualizarLista();
+  }
 
 
   @override
@@ -27,196 +37,289 @@ class _ListaTarefasPageState extends State<ListaTarefaPage> {
       appBar: _criarAppBar(),
       body: _criarBody(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            _abrirForm(tarefaAtual: null, index: null, readonly: false),
-        tooltip: 'Novo ponto turístico',
-        child: const Icon(Icons.add),
+        tooltip: 'Novo Ponto Turístico',
+        child: Icon(Icons.add),
+        onPressed: _abrirForm,
       ),
     );
   }
 
 
-  void _abrirForm({Tarefa? tarefaAtual, int? index, bool? readonly}) {
-    final key = GlobalKey<ConteudoFormDialogState>();
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(tarefaAtual == null
-                ? 'Novo ponto turístico'
-                : 'Alterar ponto turístico ${tarefaAtual.id}'),
-            content: ConteudoFormDialog(key: key, tarefaAtual: tarefaAtual),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('Cancelar'),
-              ),
-              if (readonly == null || readonly == false)
-                TextButton(
-                  onPressed: () {
-                    if (key.currentState != null &&
-                        key.currentState!.dadosValidados()) {
-                      setState(() {
-                        final novaTarefa = key.currentState!.novaTarefa;
-                        if (index == null) {
-                          novaTarefa.id = ++_ultimoId;
-                          tarefas.add(novaTarefa);
-                        } else {
-                          tarefas[index] = novaTarefa;
-                        }
-                      });
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: Text('salvar'),
-                ),
-            ],
-          );
-        });
-  }
-
-
   AppBar _criarAppBar() {
     return AppBar(
-      title: const Text('Cadastro de pontos turísticos'),
+      title: Text('Pontos Turísticos'),
       actions: [
         IconButton(
-            onPressed: _abrirPaginaFiltro, icon: const Icon(Icons.filter_list)),
+          icon: Icon(Icons.filter_list),
+          tooltip: 'Filtro e Ordenação',
+          onPressed: _abrirPaginaFiltro,
+        ),
       ],
     );
   }
 
 
   Widget _criarBody() {
-    if (tarefas.isEmpty) {
-      return const Center(
-        child: Text(
-          'Nenhum ponto turístico cadastrado',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+    if (_carregando) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.center,
+            child: CircularProgressIndicator(),
+          ),
+          Align(
+            alignment: AlignmentDirectional.center,
+            child: Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Text(
+                'Carregando seus Pontos Turísticos',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+
+          ),
+
+        ],
       );
     }
 
+    if (_tarefas.isEmpty) {
+      return Center(
+        child: Text(
+          'Nenhum ponto turístico cadastrado',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+      );
+
+    }
     return ListView.separated(
-      itemCount: tarefas.length,
+      itemCount: _tarefas.length,
       itemBuilder: (BuildContext context, int index) {
-        final tarefa = tarefas[index];
+        final tarefa = _tarefas[index];
         return PopupMenuButton<String>(
-            child: ListTile(
-              title: Text('${tarefa.id} - ${tarefa.descricao}'),
-              subtitle: Text(tarefa.prazo == null
-                  ? 'Tarefa sem prazo definido'
-                  : 'Prazo - ${tarefa.prazoFormatado}'),
+          child: ListTile(
+            leading: Checkbox(
+              value: tarefa.finalizada,
+              onChanged: (bool? checked) {
+                setState(() {
+                  tarefa.finalizada = checked == true;
+                });
+                _dao.salvar(tarefa);
+              },
             ),
-            itemBuilder: (BuildContext context) => _criarItensMenu(),
-            onSelected: (String valorSelecinado) {
-              if (valorSelecinado == ACAO_EDITAR) {
-                _abrirForm(tarefaAtual: tarefa, index: index, readonly: false);
-              } else if (valorSelecinado == ACAO_EXCLUIR) {
-                _excluir(index);
-              } else {
-                _abrirForm(tarefaAtual: tarefa, index: index, readonly: true);
-              }
-            });
+
+            title: Text(
+              '${tarefa.descricao}',
+              style: TextStyle(
+                decoration:
+                tarefa.finalizada ? TextDecoration.lineThrough : null,
+                color: tarefa.finalizada ? Colors.grey : null,
+              ),
+            ),
+            subtitle: Text(tarefa.prazo == null ? 'Sem prazo definido' : 'Cadastrados dia - ${tarefa.prazoFormatado}',
+              style: TextStyle(
+                decoration:
+                tarefa.finalizada ? TextDecoration.lineThrough : null,
+                color: tarefa.finalizada ? Colors.grey : null,
+              ),
+            ),
+
+          ),
+          itemBuilder: (_) => _criarItensMenuPopup(),
+          onSelected: (String valorSelecionado) {
+            if (valorSelecionado == acaoEditar) {
+              _abrirForm(tarefa: tarefa);
+            } else if (valorSelecionado == acaoExcluir) {
+              _excluir(tarefa);
+            } else {
+              _abrirPaginaDetalhesTarefa(tarefa);
+            }
+          },
+
+        );
       },
-      separatorBuilder: (BuildContext context, int index) => Divider(),
+      separatorBuilder: (_, __) => Divider(),
     );
   }
 
+  List<PopupMenuEntry<String>> _criarItensMenuPopup() => [
+    PopupMenuItem(
+      value: acaoEditar,
+      child: Row(
+        children: const [
+          Icon(Icons.edit, color: Colors.black),
+          Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Text('Editar'),
+          ),
 
-  void _excluir(int indice) {
+        ],
+      ),
+    ),
+    PopupMenuItem(
+      value: acaoExcluir,
+      child: Row(
+        children: const [
+          Icon(Icons.delete, color: Colors.red),
+          Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Text('Excluir'),
+          ),
+        ],
+      ),
+
+    ),
+    PopupMenuItem(
+      value: acaoVisualizar,
+      child: Row(
+        children: const [
+          Icon(Icons.info, color: Colors.blue),
+          Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Text('Visualizar'),
+          ),
+        ],
+
+      ),
+    ),
+  ];
+
+  void _abrirForm({Tarefa? tarefa}) {
+    final key = GlobalKey<ConteudoDialogFormState>();
     showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Row(
-              children: [
-                Icon(
-                  Icons.warning,
-                  color: Colors.red,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: Text('Atenção'),
-                )
-              ],
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(
+          tarefa == null ? 'Novo Ponto turísticos' : 'Alterar  ${tarefa.id}',
+        ),
+        content: ConteudoDialogForm(
+          key: key,
+          tarefa: tarefa,
+        ),
+        actions: [
+          TextButton(
+            child: Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: Text('Salvar'),
+            onPressed: () {
+              if (key.currentState?.dadosValidos() != true) {
+                return;
+              }
+              Navigator.of(context).pop();
+              final novaTarefa = key.currentState!.novaTarefa;
+              _dao.salvar(novaTarefa).then((success) {
+                if (success) {
+                  _atualizarLista();
+                }
+              });
+            },
+
+          ),
+        ],
+
+      ),
+    );
+
+  }
+
+  void _excluir(Tarefa tarefa) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning),
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text('Atenção'),
             ),
-            content: Text('O registro será deletado'),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancelar')),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    setState(() {
-                      tarefas.removeAt(indice);
-                    });
-                  },
-                  child: Text('OK'))
-            ],
-          );
-        });
+          ],
+        ),
+        content: Text('Esse registro será removido definitivamente.'),
+        actions: [
+          TextButton(
+            child: Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.pop(context);
+              if (tarefa.id == null) {
+                return;
+              }
+              _dao.remover(tarefa.id!).then((success) {
+                if (success) {
+                  _atualizarLista();
+                }
+              });
+
+            },
+          ),
+        ],
+
+      ),
+    );
   }
 
-
-  List<PopupMenuEntry<String>> _criarItensMenu() {
-    return [
-      PopupMenuItem(
-        value: ACAO_VISUALIZAR,
-        child: Row(
-          children: [
-            Icon(Icons.visibility, color: Colors.black),
-            Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Text('Visualizar'),
-            )
-          ],
-        ),
-      ),
-      PopupMenuItem(
-        value: ACAO_EDITAR,
-        child: Row(
-          children: [
-            Icon(Icons.edit, color: Colors.black),
-            Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Text('Editar'),
-            )
-          ],
-        ),
-      ),
-      PopupMenuItem(
-        value: ACAO_EXCLUIR,
-        child: Row(
-          children: [
-            Icon(Icons.delete, color: Colors.red),
-            Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Text('Excluir'),
-            )
-          ],
-        ),
-      )
-    ];
-  }
-
-
-  void _visualizar() {
+  void _abrirPaginaFiltro() async {
     final navigator = Navigator.of(context);
-    navigator.pushNamed(FiltroPage.routeName).then((alterouValores) {
-      if (alterouValores == true) {
+    final alterouValores = await navigator.pushNamed(FiltroPage.routeName);
+    if (alterouValores == true) {
+      _atualizarLista();
+    }
+  }
+
+
+  void _abrirPaginaDetalhesTarefa(Tarefa tarefa) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DetalhesTarefaPage(
+            tarefa: tarefa,
+          ),
+        ));
+  }
+
+
+  void _atualizarLista() async {
+    setState(() {
+      _carregando = true;
+    });
+    // Carregar os valores do SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final campoOrdenacao =
+        prefs.getString(FiltroPage.chaveCampoOrdenacao) ?? Tarefa.campoId;
+    final usarOrdemDecrescente =
+        prefs.getBool(FiltroPage.chaveUsarOrdemDecrescente) == true;
+    final filtroDescricao =
+        prefs.getString(FiltroPage.chaveCampoDescricao) ?? '';
+    final tarefas = await _dao.listar(
+      filtro: filtroDescricao,
+      campoOrdenacao: campoOrdenacao,
+      usarOrdemDecrescente: usarOrdemDecrescente,
+    );
+    setState(() {
+      _carregando = false;
+      _tarefas.clear();
+      if (tarefas.isNotEmpty) {
+        _tarefas.addAll(tarefas);
       }
     });
   }
 
-
-  void _abrirPaginaFiltro() {
-    final navigator = Navigator.of(context);
-    navigator.pushNamed(FiltroPage.routeName).then((alterouValores) {
-      if (alterouValores == true) {
-      }
-    });
-  }
 }
 ///fim
+
+

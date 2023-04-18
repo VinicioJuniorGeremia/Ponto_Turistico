@@ -7,6 +7,7 @@ void main() {
   runApp(const AppGerenciadorTarefas());
 }
 
+
 class AppGerenciadorTarefas extends StatelessWidget {
   const AppGerenciadorTarefas({super.key});
 
@@ -14,16 +15,18 @@ class AppGerenciadorTarefas extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Ponto Turístico',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.red,
+        primarySwatch: Colors.green,
       ),
-      home: ListaTarefaPage(),
+      home: ListaTarefasPage(),
       routes: {
-      FiltroPage.routeName: (BuildContext context) => FiltroPage(),
+        FiltroPage.routeName: (BuildContext context) => FiltroPage(),
       },
     );
+
+
   }
 }

@@ -1,8 +1,9 @@
-import '../model/tarefa.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:core';
 import 'package:intl/intl.dart';
+import '../model/tarefa.dart';
+import 'dart:core';
+
 
 class ConteudoFormDialog extends StatefulWidget{
   final Tarefa? tarefaAtual;
@@ -10,28 +11,38 @@ class ConteudoFormDialog extends StatefulWidget{
 
   ConteudoFormDialog({Key? key, this.tarefaAtual}) : super (key: key);
 
+
+
   @override
   ConteudoFormDialogState createState() => ConteudoFormDialogState();
+
 
 }
 class ConteudoFormDialogState extends State<ConteudoFormDialog> {
 
+
   final formKey = GlobalKey<FormState>();
   final descricaoController = TextEditingController();
-  final prazoController = TextEditingController();
   final diferenciaisController = TextEditingController();
+  final detalhesController = TextEditingController();
+  final prazoController = TextEditingController();
   final _dateFormat = DateFormat('dd/MM/yyyy');
+
+
 
   @override
   void initState() {
     super.initState();
     if (widget.tarefaAtual != null) {
       descricaoController.text = widget.tarefaAtual!.descricao;
+      diferenciaisController.text = widget.tarefaAtual!.diferenciais!;
+      detalhesController.text = widget.tarefaAtual!.detalhes!;
       prazoController.text = widget.tarefaAtual!.prazoFormatado;
-      diferenciaisController.text = widget.tarefaAtual!.diferenciais;
     }
     prazoController.text = _dateFormat.format(DateTime.now());
   }
+
+
   Widget build(BuildContext context) {
     return Form(
         key: formKey,
@@ -40,20 +51,31 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog> {
           children: [
             TextFormField(
               controller: descricaoController,
-              decoration: InputDecoration(labelText: 'Descrição'),
+              decoration: InputDecoration(labelText: 'Detalhes'),
               validator: (String? valor) {
                 if (valor == null || valor.isEmpty) {
-                  return 'Informe a descrição';
+                  return 'Informe os detalhes';
                 }
                 return null;
               },
             ),
+
             TextFormField(
               controller: diferenciaisController,
               decoration: InputDecoration(labelText: 'Diferenciais'),
               validator: (String? valor) {
                 if (valor == null || valor.isEmpty) {
                   return 'Informe os diferenciais';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: detalhesController,
+              decoration: InputDecoration(labelText: 'Detalhes'),
+              validator: (String? valor) {
+                if (valor == null || valor.isEmpty) {
+                  return 'Informe os detalhes';
                 }
                 return null;
               },
@@ -76,6 +98,9 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog> {
         )
     );
   }
+
+
+
   void _mostrarCalendario() {
     final dataFormatada = prazoController.text;
     var data = DateTime.now();
@@ -84,8 +109,8 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog> {
     }
     showDatePicker(context: context,
       initialDate: data,
-      lastDate: data.add(Duration(days: 365 * 5)),
       firstDate: data.subtract(Duration(days: 365 * 5)),
+      lastDate: data.add(Duration(days: 365 * 5)),
     ).then((DateTime? dataSElecionada) {
       if (dataSElecionada != null) {
         setState(() {
@@ -95,14 +120,19 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog> {
     });
   }
 
-
   bool dadosValidados()=> formKey.currentState?.validate() == true;
 
   Tarefa get novaTarefa => Tarefa(
     id: widget.tarefaAtual?.id ?? 0,
-    diferenciais: diferenciaisController.text,
     descricao: descricaoController.text,
+    diferenciais: diferenciaisController.text,
+    detalhes: detalhesController.text,
     prazo: !prazoController.text.isNotEmpty ? null : _dateFormat.parse(prazoController.text),
+
   );
+
 }
 ///fim
+
+
+
