@@ -11,16 +11,8 @@ class DatabaseProvider {
   DatabaseProvider._init();
   static final DatabaseProvider instance = DatabaseProvider._init();
 
-
   Database? _database;
 
-
-  // Future<Database> get database async {
-  //   if (_database == null) {
-  //     _database = await _initDatabase();
-  //   }
-  //   return _database!;
-  // }
   Future<Database> get database async => _database ??= await _initDatabase();
 
 
