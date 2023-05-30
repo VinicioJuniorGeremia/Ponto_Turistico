@@ -25,6 +25,7 @@ class _MapaPageState extends State<MapaPage> {
   double _distancia = 0.0;
 
 
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +42,7 @@ class _MapaPageState extends State<MapaPage> {
     _subscription = null;
   }
 
-  
+
 
   Widget build(BuildContext context) {
     return Scaffold(
