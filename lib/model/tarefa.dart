@@ -9,6 +9,8 @@ class Tarefa {
     static const campoDetalhes = "detalhes";
     static const campoPrazo = 'prazo';
     static const campoFinalizada = 'finalizada';
+    static const campoLongetude = 'longetude';
+    static const campoLatitude = 'latitude';
 
 
     int? id;
@@ -17,6 +19,8 @@ class Tarefa {
     String detalhes;
     DateTime? prazo;
     bool finalizada;
+    String longetude;
+    String latitude;
 
 
     Tarefa({
@@ -26,6 +30,8 @@ class Tarefa {
         required this.detalhes,
         this.prazo,
         this.finalizada = false,
+        required this.latitude,
+        required this.longetude
     });
 
 
@@ -44,6 +50,8 @@ class Tarefa {
         campoDetalhes: detalhes,
         campoPrazo:
         prazo == null ? null : DateFormat("yyyy-MM-dd").format(prazo!),
+        campoLatitude:latitude,
+        campoLongetude:longetude,
         campoFinalizada: finalizada ? 1 : 0,
     };
 
@@ -52,6 +60,8 @@ class Tarefa {
         id: map[campoId] is int ? map[campoId] : null,
         descricao: map[campoDescricao] is String ? map[campoDescricao] : '',
         diferenciais: map[campoDiferenciais] is String ? map[campoDiferenciais] : '',
+        latitude: map[campoLatitude] is String ? map[campoLatitude] : '',
+        longetude: map[campoLongetude] is String ? map[campoLongetude] : '',
         detalhes: map[campoDetalhes] is String ? map[campoDetalhes] : '',
         prazo: map[campoPrazo] is String
             ? DateFormat("yyyy-MM-dd").parse(map[campoPrazo])

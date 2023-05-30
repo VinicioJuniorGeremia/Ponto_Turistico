@@ -38,6 +38,9 @@ class DatabaseProvider {
         ${Tarefa.campoDetalhes} TEXT NOT NULL,
         ${Tarefa.campoPrazo} TEXT,
         ${Tarefa.campoFinalizada} INTEGER NOT NULL DEFAULT 0
+        ${PontoTuristico.campoLatitude} INTEGER NOT NULL DEFAULT 0
+        ${PontoTuristico.campoLongetude} INTEGER NOT NULL DEFAULT 0
+        
       );
     ''');
 

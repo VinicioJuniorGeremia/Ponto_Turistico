@@ -1,140 +1,152 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../model/tarefa.dart';
-
-class ConteudoDialogForm extends StatefulWidget {
-  final Tarefa? tarefa;
+import 'dart:core';
 
 
-  ConteudoDialogForm({Key? key, this.tarefa}) : super(key: key);
+class ConteudoFormDialog extends StatefulWidget{
+  final Tarefa? tarefaAtual;
 
 
-  void init() {}
+  ConteudoFormDialog({Key? key, this.tarefaAtual}) : super (key: key);
+
 
 
   @override
-  State<StatefulWidget> createState() => ConteudoDialogFormState();
-}
+  ConteudoFormDialogState createState() => ConteudoFormDialogState();
 
-class ConteudoDialogFormState extends State<ConteudoDialogForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _descricaoController = TextEditingController();
-  final _diferenciaisController = TextEditingController();
-  final _detalhesController = TextEditingController();
-  final _prazoController = TextEditingController();
+
+}
+class ConteudoFormDialogState extends State<ConteudoFormDialog> {
+
+  String get _latitude => _localizacaoAtual?.latitude.toString() ?? '';
+
+  String get _longitude => _localizacaoAtual?.longitude.toString() ?? '';
+
+
+  final formKey = GlobalKey<FormState>();
+  final descricaoController = TextEditingController();
+  final diferenciaisController = TextEditingController();
+  final detalhesController = TextEditingController();
+  final prazoController = TextEditingController();
   final _dateFormat = DateFormat('dd/MM/yyyy');
+
 
 
   @override
   void initState() {
     super.initState();
-    if (widget.tarefa != null) {
-      _descricaoController.text = widget.tarefa!.descricao;
-      _diferenciaisController.text = widget.tarefa!.diferenciais;
-      _detalhesController.text = widget.tarefa!.detalhes;
-      _prazoController.text = widget.tarefa!.prazoFormatado;
+    if (widget.tarefaAtual != null) {
+      descricaoController.text = widget.tarefaAtual!.descricao;
+      diferenciaisController.text = widget.tarefaAtual!.diferenciais!;
+      detalhesController.text = widget.tarefaAtual!.detalhes!;
+      prazoController.text = widget.tarefaAtual!.prazoFormatado;
+      _longetudeController.text = widget.turismoAtual!.longetude;
+      _latitudeController.text = widget.turismoAtual!.latitude;
     }
+    prazoController.text = _dateFormat.format(DateTime.now());
   }
 
 
-  @override
   Widget build(BuildContext context) {
     return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            controller: _descricaoController,
-            decoration: InputDecoration(
-              labelText: 'Nome',
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: descricaoController,
+              decoration: InputDecoration(labelText: 'Detalhes'),
+              validator: (String? valor) {
+                if (valor == null || valor.isEmpty) {
+                  return 'Informe os detalhes';
+                }
+                return null;
+              },
             ),
-            validator: (String? valor) {
-              if (valor == null || valor.trim().isEmpty) {
-                return 'Informe o nome';
-              }
-              return null;
-            },
-          ),
-          TextFormField(
-            controller: _diferenciaisController,
-            decoration: InputDecoration(
-              labelText: 'Diferencial',
-            ),
-            validator: (String? valor) {
-              if (valor == null || valor.trim().isEmpty) {
-                return 'Informe o diferencial';
-              }
-              return null;
-            },
-          ),
-          TextFormField(
-            controller: _detalhesController,
-            decoration: InputDecoration(
-              labelText: 'Detalhes',
-            ),
-            validator: (String? valor) {
-              if (valor == null || valor.trim().isEmpty) {
-                return 'Informe o detalhe';
-              }
-              return null;
-            },
-          ),
-          TextFormField(
-            controller: _prazoController,
-            decoration: InputDecoration(
-              labelText: 'Prazo',
-              prefixIcon: IconButton(
-                icon: Icon(Icons.calendar_today),
-                onPressed: _mostrarCalendario,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () => _prazoController.clear(),
-              ),
-            ),
-            readOnly: true,
-          ),
 
-        ],
-      ),
-
+            TextFormField(
+              controller: diferenciaisController,
+              decoration: InputDecoration(labelText: 'Diferenciais'),
+              validator: (String? valor) {
+                if (valor == null || valor.isEmpty) {
+                  return 'Informe os diferenciais';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: detalhesController,
+              decoration: InputDecoration(labelText: 'Detalhes'),
+              validator: (String? valor) {
+                if (valor == null || valor.isEmpty) {
+                  return 'Informe os detalhes';
+                }
+                return null;
+              },
+            ),
+            ElevatedButton(
+              onPressed: _obterLocalizacaoAtual,
+              child: Text('Obter Localização'),
+            ),
+            Text('Latitude: ${widget.turismoAtual?.latitude ?? _latitude}  |  Longitude: ${widget.turismoAtual?.longetude ?? _longitude}'
+            ),
+            TextFormField(
+              controller: prazoController,
+              decoration: InputDecoration(labelText: 'Prazo',
+                prefixIcon: IconButton(
+                  onPressed: _mostrarCalendario,
+                  icon: Icon(Icons.calendar_today),
+                ),
+                suffixIcon: IconButton(
+                  onPressed: () => prazoController.clear(),
+                  icon: Icon(Icons.close),
+                ),
+              ),
+              readOnly: true,
+            ),
+          ],
+        )
     );
   }
 
-  void _mostrarCalendario() async {
-    final dataFormatada = _prazoController.text;
-    DateTime data;
-    if (dataFormatada.trim().isNotEmpty) {
+
+
+  void _mostrarCalendario() {
+    final dataFormatada = prazoController.text;
+    var data = DateTime.now();
+    if (dataFormatada.isNotEmpty) {
       data = _dateFormat.parse(dataFormatada);
-    } else {
-      data = DateTime.now();
     }
-    final dataSelecionada = await showDatePicker(
-      context: context,
+    showDatePicker(context: context,
       initialDate: data,
-      firstDate: DateTime.now().subtract(Duration(days: 5 * 365)),
-      lastDate: DateTime.now().add(Duration(days: 5 * 365)),
-    );
-    if (dataSelecionada != null) {
-      _prazoController.text = _dateFormat.format(dataSelecionada);
-    }
+      firstDate: data.subtract(Duration(days: 365 * 5)),
+      lastDate: data.add(Duration(days: 365 * 5)),
+    ).then((DateTime? dataSElecionada) {
+      if (dataSElecionada != null) {
+        setState(() {
+          prazoController.text = _dateFormat.format(dataSElecionada);
+        });
+      }
+    });
   }
 
-
-  bool dadosValidos() => _formKey.currentState?.validate() == true;
+  bool dadosValidados()=> formKey.currentState?.validate() == true;
 
   Tarefa get novaTarefa => Tarefa(
-    id: widget.tarefa?.id,
-    descricao: _descricaoController.text,
-    diferenciais: _diferenciaisController.text,
-    detalhes: _detalhesController.text,
-    prazo: _prazoController.text.isEmpty
-        ? null
-        : _dateFormat.parse(_prazoController.text),
+    id: widget.tarefaAtual?.id ?? 0,
+    descricao: descricaoController.text,
+    diferenciais: diferenciaisController.text,
+    detalhes: detalhesController.text,
+    latitude: _latitude,
+    longetude: _longitude,
+    prazo: !prazoController.text.isNotEmpty ? null : _dateFormat.parse(prazoController.text),
+
   );
 
 }
 ///fim
+
 
 

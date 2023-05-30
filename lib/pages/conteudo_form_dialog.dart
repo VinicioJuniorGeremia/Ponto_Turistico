@@ -20,6 +20,10 @@ class ConteudoFormDialog extends StatefulWidget{
 }
 class ConteudoFormDialogState extends State<ConteudoFormDialog> {
 
+  String get _latitude => _localizacaoAtual?.latitude.toString() ?? '';
+
+  String get _longitude => _localizacaoAtual?.longitude.toString() ?? '';
+
 
   final formKey = GlobalKey<FormState>();
   final descricaoController = TextEditingController();
@@ -38,6 +42,8 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog> {
       diferenciaisController.text = widget.tarefaAtual!.diferenciais!;
       detalhesController.text = widget.tarefaAtual!.detalhes!;
       prazoController.text = widget.tarefaAtual!.prazoFormatado;
+      _longetudeController.text = widget.turismoAtual!.longetude;
+      _latitudeController.text = widget.turismoAtual!.latitude;
     }
     prazoController.text = _dateFormat.format(DateTime.now());
   }
@@ -79,6 +85,12 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog> {
                 }
                 return null;
               },
+            ),
+            ElevatedButton(
+              onPressed: _obterLocalizacaoAtual,
+              child: Text('Obter Localização'),
+            ),
+            Text('Latitude: ${widget.turismoAtual?.latitude ?? _latitude}  |  Longitude: ${widget.turismoAtual?.longetude ?? _longitude}'
             ),
             TextFormField(
               controller: prazoController,
@@ -127,6 +139,8 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog> {
     descricao: descricaoController.text,
     diferenciais: diferenciaisController.text,
     detalhes: detalhesController.text,
+    latitude: _latitude,
+    longetude: _longitude,
     prazo: !prazoController.text.isNotEmpty ? null : _dateFormat.parse(prazoController.text),
 
   );

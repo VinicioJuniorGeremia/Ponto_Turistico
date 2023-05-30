@@ -305,7 +305,9 @@ class _ListaTarefasPageState extends State<ListaTarefasPage> {
         prefs.getBool(FiltroPage.chaveUsarOrdemDecrescente) == true;
     final filtroDescricao =
         prefs.getString(FiltroPage.chaveCampoDescricao) ?? '';
-    final tarefas = await _dao.listar(
+    final filtroNome =
+        prefs.getString(FiltroPage.chaveCampoNome) ?? '';
+    final turismos = await _dao.listar(
       filtro: filtroDescricao,
       campoOrdenacao: campoOrdenacao,
       usarOrdemDecrescente: usarOrdemDecrescente,

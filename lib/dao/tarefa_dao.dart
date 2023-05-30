@@ -59,7 +59,9 @@ class TarefaDao {
         Tarefa.campoDiferenciais,
         Tarefa.campoDetalhes,
         Tarefa.campoPrazo,
-        Tarefa.campoFinalizada
+        Tarefa.campoFinalizada,
+        PontoTuristico.campoLatitude,
+        PontoTuristico.campoLongetude
       ],
 
       where: where,

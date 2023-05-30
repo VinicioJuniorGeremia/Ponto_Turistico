@@ -53,6 +53,22 @@ class _DetalhesTarefaPageState extends State<DetalhesTarefaPage> {
         ),
         Row(
           children: [
+            Campo(descricao: 'Localização: '),
+            Valor(
+              valor: 'Latitude: ${widget.pontoturistico.latitude}\nLongetude: ${widget.pontoturistico.longetude}',
+            ),
+            ElevatedButton(
+                onPressed: _abrirCoordenadasNoMapaExterno,
+                child: Icon(Icons.map)
+            ),
+            ElevatedButton(
+                onPressed: _abrirCoordenadasNoMapaInterno,
+                child: Icon(Icons.map)
+            ),
+          ],
+        ),
+        Row(
+          children: [
             Campo(descricao: 'Prazo: '),
             Valor(valor: widget.tarefa.prazoFormatado),
           ],
@@ -86,6 +102,25 @@ class Campo extends StatelessWidget {
   }
 }
 
+void _abrirCoordenadasNoMapaExterno() {
+  if (widget.pontoturistico.latitude.isEmpty || widget.pontoturistico.longetude.isEmpty ) {
+    return;
+  }
+  MapsLauncher.launchCoordinates(double.parse(widget.pontoturistico.latitude), double.parse(widget.pontoturistico.longetude));
+}
+
+void _abrirCoordenadasNoMapaInterno(){
+  if (widget.pontoturistico.latitude.isEmpty || widget.pontoturistico.longetude.isEmpty ){
+    return;
+  }
+  Navigator.push(context,
+    MaterialPageRoute(builder: (BuildContext context) => MapaPage(
+        latitude: double.parse(widget.pontoturistico.latitude), longitude: double.parse(widget.pontoturistico.longetude)
+    ),
+    ),
+  );
+}
+}
 
 class Valor extends StatelessWidget {
   final String valor;
