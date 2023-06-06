@@ -42,7 +42,7 @@ class DatabaseProvider {
         ${Tarefa.CAMPO_LONGITUDE} REAL
       );
     ''');
-
+///
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
