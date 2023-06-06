@@ -3,40 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/tarefa.dart';
 
-
 class FiltroPage extends StatefulWidget{
   static const routeName = '/filtro';
   static const chaveCampoOrdenacao = 'campoOrdenacao';
-  static const chaveUsarOrdemDecrescente = 'usarOrdemDecrescente';
+  static const chaveUsarOrdemDecresecente = 'usarOrdemDecresecente';
   static const chaveCampoDescricao = 'campoDescricao';
-  static const chaveCampoDiferenciais = 'campoDiferenciais';
-  static const chaveCampoDetalhes = 'campoDetalhes';
-
 
   @override
   _FiltroPageState createState() => _FiltroPageState();
-
-
 }
-class _FiltroPageState extends State<FiltroPage> {
 
+class _FiltroPageState extends State<FiltroPage>{
   final _camposParaOrdenacao = {
-    Tarefa.campoId: 'Código',
-    Tarefa.campoDescricao: 'Descrição',
-    Tarefa.campoDiferenciais: 'Diferenciais',
-    Tarefa.campoDetalhes: 'Detalhes',
-    Tarefa.campoPrazo: 'Prazo'
+    Tarefa.CAMPO_ID : "Código",
+    Tarefa.CAMPO_DESCRICAO: "Descrição",
+    Tarefa.CAMPO_INCLUSAO: "Inclusão"
   };
 
-
-  late final SharedPreferences _prefes;
+  late final SharedPreferences _prefs;
   final _descricaoController = TextEditingController();
-  final _diferenciaisController = TextEditingController();
-  final _detalhesController = TextEditingController();
-  String _campoOrdenacao = Tarefa.campoId;
+  String _campoOrdenacao = Tarefa.CAMPO_ID;
   bool _usarOrdemDecrescente = false;
   bool _alterouValores = false;
-
 
   @override
   void initState(){
@@ -44,18 +32,15 @@ class _FiltroPageState extends State<FiltroPage> {
     _carregaDadosSharedPreferences();
   }
 
-
-  void _carregaDadosSharedPreferences() async {
-    _prefes = await SharedPreferences.getInstance();
+  void _carregaDadosSharedPreferences() async{
+    _prefs = await SharedPreferences.getInstance();
     setState(() {
-      _campoOrdenacao = _prefes.getString(FiltroPage.chaveCampoOrdenacao) ?? Tarefa.campoId;
-      _usarOrdemDecrescente = _prefes.getBool(FiltroPage.chaveUsarOrdemDecrescente) == true;
-      _descricaoController.text = _prefes.getString(FiltroPage.chaveCampoDescricao) ?? '' ;
-      _diferenciaisController.text = _prefes.getString(FiltroPage.chaveCampoDiferenciais) ?? '' ;
-      _detalhesController.text = _prefes.getString(FiltroPage.chaveCampoDetalhes) ?? '' ;
+      _campoOrdenacao = _prefs.getString(FiltroPage.chaveCampoOrdenacao) ?? Tarefa.CAMPO_ID;
+      _usarOrdemDecrescente = _prefs.getBool(FiltroPage.chaveUsarOrdemDecresecente) == true;
+      _descricaoController.text = _prefs.getString(FiltroPage.chaveCampoDescricao) ?? '';
     });
-  }
 
+  }
 
   @override
   Widget build(BuildContext context){
@@ -63,39 +48,40 @@ class _FiltroPageState extends State<FiltroPage> {
       child: Scaffold(
         appBar: AppBar(title: Text('Filtro e Ordenação'),
         ),
-        body: _criarBody(),
+        body: _criaBody(),
       ),
       onWillPop: _onVoltarClick,
     );
+
+
   }
 
-
-  Widget _criarBody() {
+  Widget _criaBody() {
     return ListView(
       children: [
         Padding(
           padding: EdgeInsets.only(left: 10, top: 10),
-          child: Text('Campos para Ordenação'),
+          child: Text('Campo para Ordenação'),
         ),
-        for (final campo in _camposParaOrdenacao.keys)
+        for(final campo in _camposParaOrdenacao.keys)
           Row(
             children: [
               Radio(
-                value: campo,
-                groupValue: _campoOrdenacao,
-                onChanged: _onCampoParaOrdenacaoChanged,
+                  value: campo,
+                  groupValue: _campoOrdenacao,
+                  onChanged: _onCampoParaOrdenacaoChanged
               ),
-              Text(_camposParaOrdenacao[campo]!),
+              Text(_camposParaOrdenacao[campo]!)
             ],
           ),
         Divider(),
         Row(
           children: [
             Checkbox(
-              value: _usarOrdemDecrescente,
-              onChanged: _onUsarOrdemDecrescenteChanged,
+                value: _usarOrdemDecrescente,
+                onChanged: _onUsarOrdemDecrescenteChanged
             ),
-            Text('Usar ordem decrescente'),
+            Text("Decrescente")
           ],
         ),
         Divider(),
@@ -103,48 +89,48 @@ class _FiltroPageState extends State<FiltroPage> {
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: TextField(
             decoration: InputDecoration(
-              labelText: 'Descrição começa com:',
+                labelText: "Começa em: "
             ),
-            controller: _descricaoController ,
+            controller: _descricaoController,
             onChanged: _onFiltroDescricaoChanged,
           ),
-        )
+
+        ),
       ],
+
     );
   }
 
-
-  void _onCampoParaOrdenacaoChanged(String? valor){
-    _prefes.setString(FiltroPage.chaveCampoOrdenacao, valor!);
+  void _onCampoParaOrdenacaoChanged(String? valor) {
+    _prefs.setString(FiltroPage.chaveCampoOrdenacao, valor!);
     _alterouValores = true;
     setState(() {
       _campoOrdenacao = valor;
     });
+
+
   }
 
-
-  void _onUsarOrdemDecrescenteChanged(bool? valor){
-    _prefes.setBool(FiltroPage.chaveUsarOrdemDecrescente, valor!);
+  void _onUsarOrdemDecrescenteChanged(bool? valor) {
+    _prefs.setBool(FiltroPage.chaveUsarOrdemDecresecente, valor!);
     _alterouValores = true;
     setState(() {
       _usarOrdemDecrescente = valor;
     });
+
+
   }
 
-  void _onFiltroDescricaoChanged(String? valor){
-    _prefes.setString(FiltroPage.chaveCampoDescricao, valor!);
+  void _onFiltroDescricaoChanged(String? valor) {
+    _prefs.setString(FiltroPage.chaveCampoDescricao, valor!);
     _alterouValores = true;
   }
 
-
-  Future<bool> _onVoltarClick() async {
+  Future<bool> _onVoltarClick() async{
     Navigator.of(context).pop(_alterouValores);
     return true;
   }
 
+
 }
 ///fim
-
-
-
-

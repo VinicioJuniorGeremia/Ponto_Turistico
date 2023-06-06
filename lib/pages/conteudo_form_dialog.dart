@@ -1,152 +1,114 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import '../model/tarefa.dart';
-import 'dart:core';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 
 class ConteudoFormDialog extends StatefulWidget{
-  final Tarefa? tarefaAtual;
+  final Tarefa? pontoAtual;
 
 
-  ConteudoFormDialog({Key? key, this.tarefaAtual}) : super (key: key);
-
+  ConteudoFormDialog({Key? key, this.pontoAtual}) : super (key: key);
 
 
   @override
   ConteudoFormDialogState createState() => ConteudoFormDialogState();
-
-
 }
-class ConteudoFormDialogState extends State<ConteudoFormDialog> {
 
-  String get _latitude => _localizacaoAtual?.latitude.toString() ?? '';
-
-  String get _longitude => _localizacaoAtual?.longitude.toString() ?? '';
-
+class ConteudoFormDialogState extends State<ConteudoFormDialog>{
 
   final formKey = GlobalKey<FormState>();
   final descricaoController = TextEditingController();
+  final nomeController = TextEditingController();
+  final inclusaoController = TextEditingController();
   final diferenciaisController = TextEditingController();
-  final detalhesController = TextEditingController();
-  final prazoController = TextEditingController();
   final _dateFormat = DateFormat('dd/MM/yyyy');
-
+  Position? localizacaoAtual;
 
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
-    if (widget.tarefaAtual != null) {
-      descricaoController.text = widget.tarefaAtual!.descricao;
-      diferenciaisController.text = widget.tarefaAtual!.diferenciais!;
-      detalhesController.text = widget.tarefaAtual!.detalhes!;
-      prazoController.text = widget.tarefaAtual!.prazoFormatado;
-      _longetudeController.text = widget.turismoAtual!.longetude;
-      _latitudeController.text = widget.turismoAtual!.latitude;
+    if(widget.pontoAtual != null){
+      nomeController.text = widget.pontoAtual!.nome;
+      descricaoController.text = widget.pontoAtual!.descricao;
+      diferenciaisController.text = widget.pontoAtual!.diferenciais;
+      inclusaoController.text = widget.pontoAtual!.prazoFormatado;
     }
-    prazoController.text = _dateFormat.format(DateTime.now());
+
   }
 
 
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context){
     return Form(
         key: formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              controller: descricaoController,
-              decoration: InputDecoration(labelText: 'Detalhes'),
+              controller: nomeController,
+              decoration: const InputDecoration(labelText: 'Nome'),
               validator: (String? valor) {
                 if (valor == null || valor.isEmpty) {
-                  return 'Informe os detalhes';
+                  return 'Nome';
                 }
                 return null;
               },
-            ),
 
+            ),
+            TextFormField(
+              controller: descricaoController,
+              decoration: const InputDecoration(labelText: 'Descrição'),
+              validator: (String? valor) {
+                if (valor == null || valor.isEmpty) {
+                  return 'Descrição';
+                }
+
+                return null;
+              },
+
+            ),
             TextFormField(
               controller: diferenciaisController,
-              decoration: InputDecoration(labelText: 'Diferenciais'),
+              decoration: const InputDecoration(labelText: 'Diferenciais'),
               validator: (String? valor) {
                 if (valor == null || valor.isEmpty) {
-                  return 'Informe os diferenciais';
+                  return 'Diferenciais';
                 }
                 return null;
               },
+
             ),
-            TextFormField(
-              controller: detalhesController,
-              decoration: InputDecoration(labelText: 'Detalhes'),
-              validator: (String? valor) {
-                if (valor == null || valor.isEmpty) {
-                  return 'Informe os detalhes';
-                }
-                return null;
-              },
-            ),
-            ElevatedButton(
-              onPressed: _obterLocalizacaoAtual,
-              child: Text('Obter Localização'),
-            ),
-            Text('Latitude: ${widget.turismoAtual?.latitude ?? _latitude}  |  Longitude: ${widget.turismoAtual?.longetude ?? _longitude}'
-            ),
-            TextFormField(
-              controller: prazoController,
-              decoration: InputDecoration(labelText: 'Prazo',
-                prefixIcon: IconButton(
-                  onPressed: _mostrarCalendario,
-                  icon: Icon(Icons.calendar_today),
-                ),
-                suffixIcon: IconButton(
-                  onPressed: () => prazoController.clear(),
-                  icon: Icon(Icons.close),
-                ),
-              ),
-              readOnly: true,
+            Divider(color: Colors.white,),
+            Row(
+              children: [
+                Icon(Icons.calendar_today),
+                Text("Data: ${inclusaoController.text.isEmpty ? _dateFormat.format(DateTime.now()) : inclusaoController.text}")
+              ],
+
             ),
           ],
+
         )
     );
+
   }
 
+  bool dadosValidados() => formKey.currentState?.validate() == true;
 
 
-  void _mostrarCalendario() {
-    final dataFormatada = prazoController.text;
-    var data = DateTime.now();
-    if (dataFormatada.isNotEmpty) {
-      data = _dateFormat.parse(dataFormatada);
-    }
-    showDatePicker(context: context,
-      initialDate: data,
-      firstDate: data.subtract(Duration(days: 365 * 5)),
-      lastDate: data.add(Duration(days: 365 * 5)),
-    ).then((DateTime? dataSElecionada) {
-      if (dataSElecionada != null) {
-        setState(() {
-          prazoController.text = _dateFormat.format(dataSElecionada);
-        });
-      }
-    });
-  }
 
-  bool dadosValidados()=> formKey.currentState?.validate() == true;
-
-  Tarefa get novaTarefa => Tarefa(
-    id: widget.tarefaAtual?.id ?? 0,
-    descricao: descricaoController.text,
-    diferenciais: diferenciaisController.text,
-    detalhes: detalhesController.text,
-    latitude: _latitude,
-    longetude: _longitude,
-    prazo: !prazoController.text.isNotEmpty ? null : _dateFormat.parse(prazoController.text),
-
+  Tarefa get novoPonto => Tarefa(
+      id: widget.pontoAtual?.id ?? 0,
+      nome: nomeController.text,
+      descricao: descricaoController.text,
+      diferenciais: diferenciaisController.text,
+      dataInclusao: DateTime.now(),
+      latitude: '',
+      longitude: ''
   );
+
 
 }
 ///fim
-
-
-

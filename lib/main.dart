@@ -2,22 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:gerenciador_tarefas_md/pages/filtro_page.dart';
 import 'package:gerenciador_tarefas_md/pages/lista_tarefas_page.dart';
 
-
 void main() {
-  runApp(const AppGerenciadorTarefas());
+  runApp(const AppPontosTuristicos());
 }
 
+class AppPontosTuristicos extends StatelessWidget {
+  const AppPontosTuristicos({super.key});
 
-class AppGerenciadorTarefas extends StatelessWidget {
-  const AppGerenciadorTarefas({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ponto Turístico',
+      title: 'Pontos Turisticos',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+
         primaryColor: Colors.red,
         primarySwatch: Colors.green,
       ),
@@ -26,7 +24,5 @@ class AppGerenciadorTarefas extends StatelessWidget {
         FiltroPage.routeName: (BuildContext context) => FiltroPage(),
       },
     );
-///fimm
-
   }
 }

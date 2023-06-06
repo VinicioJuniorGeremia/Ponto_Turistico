@@ -1,76 +1,72 @@
 import 'package:intl/intl.dart';
 
-
-class Tarefa {
-    static const nomeTabela = 'tarefa';
-    static const campoId = '_id';
-    static const campoDescricao = 'descricao';
-    static const campoDiferenciais = "diferenciais";
-    static const campoDetalhes = "detalhes";
-    static const campoPrazo = 'prazo';
-    static const campoFinalizada = 'finalizada';
-    static const campoLongetude = 'longetude';
-    static const campoLatitude = 'latitude';
+class Tarefa{
+    static const NOME_TABELA = 'Tarefa';
+    static const CAMPO_ID = 'id';
+    static const CAMPO_NOME = 'nome';
+    static const CAMPO_DESCRICAO = 'descricao';
+    static const CAMPO_DIFERENCIAIS = 'diferenciais';
+    static const CAMPO_INCLUSAO = 'inclusao';
+    static const CAMPO_LATITUDE = 'latitude';
+    static const CAMPO_LONGITUDE = 'longitude';
 
 
-    int? id;
+    int id;
+    String nome;
     String descricao;
     String diferenciais;
-    String detalhes;
-    DateTime? prazo;
+    DateTime? dataInclusao;
     bool finalizada;
-    String longetude;
     String latitude;
+    String longitude;
 
 
     Tarefa({
-        this.id,
+        required this.id,
+        required this.nome,
         required this.descricao,
         required this.diferenciais,
-        required this.detalhes,
-        this.prazo,
+        this.dataInclusao,
         this.finalizada = false,
         required this.latitude,
-        required this.longetude
+        required this.longitude
+
     });
 
-
-    String get prazoFormatado {
-        if (prazo == null) {
+    String get prazoFormatado{
+        if (dataInclusao == null){
             return '';
         }
-        return DateFormat('dd/MM/yyyy').format(prazo!);
+
+        return DateFormat('dd/MM/yyyy').format(dataInclusao!);
     }
 
 
     Map<String, dynamic> toMap() => {
-        campoId: id,
-        campoDescricao: descricao,
-        campoDiferenciais: diferenciais,
-        campoDetalhes: detalhes,
-        campoPrazo:
-        prazo == null ? null : DateFormat("yyyy-MM-dd").format(prazo!),
-        campoLatitude:latitude,
-        campoLongetude:longetude,
-        campoFinalizada: finalizada ? 1 : 0,
+        CAMPO_ID: id == 0 ? null : id,
+        CAMPO_NOME: nome,
+        CAMPO_DIFERENCIAIS: diferenciais,
+        CAMPO_DESCRICAO: descricao,
+        CAMPO_INCLUSAO:
+        dataInclusao == null ? null : DateFormat("yyyy-MM-dd").format(dataInclusao!),
+        CAMPO_LATITUDE: latitude,
+        CAMPO_LONGITUDE: longitude
+
+
     };
 
-
     factory Tarefa.fromMap(Map<String, dynamic> map) => Tarefa(
-        id: map[campoId] is int ? map[campoId] : null,
-        descricao: map[campoDescricao] is String ? map[campoDescricao] : '',
-        diferenciais: map[campoDiferenciais] is String ? map[campoDiferenciais] : '',
-        latitude: map[campoLatitude] is String ? map[campoLatitude] : '',
-        longetude: map[campoLongetude] is String ? map[campoLongetude] : '',
-        detalhes: map[campoDetalhes] is String ? map[campoDetalhes] : '',
-        prazo: map[campoPrazo] is String
-            ? DateFormat("yyyy-MM-dd").parse(map[campoPrazo])
+        id: map[CAMPO_ID] is int ? map[CAMPO_ID] : null,
+        nome: map[CAMPO_NOME] is String ? map[CAMPO_NOME] : '',
+        descricao: map[CAMPO_DESCRICAO] is String ? map[CAMPO_DESCRICAO] : '',
+        diferenciais: map[CAMPO_DIFERENCIAIS] is String ? map[CAMPO_DIFERENCIAIS] : '',
+        dataInclusao: map[CAMPO_INCLUSAO] is String
+            ? DateFormat("yyyy-MM-dd").parse(map[CAMPO_INCLUSAO])
             : null,
-        finalizada: map[campoFinalizada] == 1,
+        latitude: map[CAMPO_LATITUDE] is String ? map[CAMPO_LATITUDE] : '',
+        longitude: map[CAMPO_LONGITUDE] is String ? map[CAMPO_LONGITUDE] : ''
     );
 
+
 }
-
 ///fim
-
-

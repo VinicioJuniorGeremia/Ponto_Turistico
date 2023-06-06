@@ -1,5 +1,6 @@
-import '../database/database_provider.dart';
 import '../model/tarefa.dart';
+import '../database/database_provider.dart';
+
 
 
 class TarefaDao {
@@ -9,26 +10,26 @@ class TarefaDao {
   Future<bool> salvar(Tarefa tarefa) async {
     final database = await databaseProvider.database;
     final valores = tarefa.toMap();
-    if (tarefa.id == null) {
-      tarefa.id = await database.insert(Tarefa.nomeTabela, valores);
+    if (tarefa.id == 0) {
+      tarefa.id = await database.insert(Tarefa.NOME_TABELA, valores);
       return true;
     } else {
       final registrosAtualizados = await database.update(
-        Tarefa.nomeTabela,
+        Tarefa.NOME_TABELA,
         valores,
-        where: '${Tarefa.campoId} = ?',
+        where: '${Tarefa.CAMPO_ID} = ?',
         whereArgs: [tarefa.id],
       );
       return registrosAtualizados > 0;
     }
-  }
 
+  }
 
   Future<bool> remover(int id) async {
     final database = await databaseProvider.database;
     final registrosAtualizados = await database.delete(
-      Tarefa.nomeTabela,
-      where: '${Tarefa.campoId} = ?',
+      Tarefa.NOME_TABELA,
+      where: '${Tarefa.CAMPO_ID} = ?',
       whereArgs: [id],
     );
     return registrosAtualizados > 0;
@@ -37,14 +38,13 @@ class TarefaDao {
 
   Future<List<Tarefa>> listar({
     String filtro = '',
-    String campoOrdenacao = Tarefa.campoId,
+    String campoOrdenacao = Tarefa.CAMPO_ID,
     bool usarOrdemDecrescente = false,
   }) async {
     String? where;
     if (filtro.isNotEmpty) {
-      where = "UPPER(${Tarefa.campoDescricao}) LIKE '${filtro.toUpperCase()}%'";
+      where = "UPPER(${Tarefa.CAMPO_DESCRICAO}) LIKE '${filtro.toUpperCase()}%'";
     }
-
     var orderBy = campoOrdenacao;
     if (usarOrdemDecrescente) {
       orderBy += ' DESC';
@@ -52,22 +52,20 @@ class TarefaDao {
 
     final database = await databaseProvider.database;
     final resultado = await database.query(
-      Tarefa.nomeTabela,
+      Tarefa.NOME_TABELA,
       columns: [
-        Tarefa.campoId,
-        Tarefa.campoDescricao,
-        Tarefa.campoDiferenciais,
-        Tarefa.campoDetalhes,
-        Tarefa.campoPrazo,
-        Tarefa.campoFinalizada,
-        PontoTuristico.campoLatitude,
-        PontoTuristico.campoLongetude
+        Tarefa.CAMPO_ID,
+        Tarefa.CAMPO_DESCRICAO,
+        Tarefa.CAMPO_NOME,
+        Tarefa.CAMPO_DIFERENCIAIS,
+        Tarefa.CAMPO_INCLUSAO,
+        Tarefa.CAMPO_LATITUDE,
+        Tarefa.CAMPO_LONGITUDE
       ],
 
       where: where,
       orderBy: orderBy,
     );
-
     return resultado.map((m) => Tarefa.fromMap(m)).toList();
   }
 

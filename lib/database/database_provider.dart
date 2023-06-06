@@ -1,6 +1,6 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
 import '../model/tarefa.dart';
+import 'package:sqflite/sqflite.dart';
 
 
 class DatabaseProvider {
@@ -11,10 +11,12 @@ class DatabaseProvider {
   DatabaseProvider._init();
   static final DatabaseProvider instance = DatabaseProvider._init();
 
+
   Database? _database;
 
-  Future<Database> get database async => _database ??= await _initDatabase();
 
+
+  Future<Database> get database async => _database ??= await _initDatabase();
 
   Future<Database> _initDatabase() async {
     final databasesPath = await getDatabasesPath();
@@ -28,33 +30,22 @@ class DatabaseProvider {
 
   }
 
-
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(''' 
-      CREATE TABLE ${Tarefa.nomeTabela} (
-        ${Tarefa.campoId} INTEGER PRIMARY KEY AUTOINCREMENT,
-        ${Tarefa.campoDescricao} TEXT NOT NULL,
-        ${Tarefa.campoDiferenciais} TEXT NOT NULL,
-        ${Tarefa.campoDetalhes} TEXT NOT NULL,
-        ${Tarefa.campoPrazo} TEXT,
-        ${Tarefa.campoFinalizada} INTEGER NOT NULL DEFAULT 0
-        ${PontoTuristico.campoLatitude} INTEGER NOT NULL DEFAULT 0
-        ${PontoTuristico.campoLongetude} INTEGER NOT NULL DEFAULT 0
-        
+      CREATE TABLE ${Tarefa.NOME_TABELA} (
+        ${Tarefa.CAMPO_ID} INTEGER PRIMARY KEY AUTOINCREMENT,
+        ${Tarefa.CAMPO_DESCRICAO} TEXT NOT NULL,
+        ${Tarefa.CAMPO_NOME} TEXT,
+        ${Tarefa.CAMPO_DIFERENCIAIS} TEXT,
+        ${Tarefa.CAMPO_INCLUSAO} TEXT,
+        ${Tarefa.CAMPO_LATITUDE} REAL,
+        ${Tarefa.CAMPO_LONGITUDE} REAL
       );
     ''');
 
   }
 
-
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    switch (oldVersion) {
-      case 1:
-        await db.execute(''' 
-          ALTER TABLE ${Tarefa.nomeTabela}
-          ADD ${Tarefa.campoFinalizada} INTEGER NOT NULL DEFAULT 0;
-        ''');
-    }
 
   }
 
@@ -65,8 +56,8 @@ class DatabaseProvider {
     }
 
   }
-}
 
+}
 ///fim
 
 
