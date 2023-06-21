@@ -1,8 +1,12 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:gerenciador_tarefas_md/services/cep_service.dart';
 import 'package:intl/intl.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import '../model/cep_model.dart';
 import '../model/tarefa.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 
 
 class ConteudoFormDialog extends StatefulWidget{
@@ -17,12 +21,19 @@ class ConteudoFormDialog extends StatefulWidget{
 }
 
 class ConteudoFormDialogState extends State<ConteudoFormDialog>{
-
+  final _service = CepService();
+  final _cepFormater = MaskTextInputFormatter(
+      mask: '#####-###',
+      filter: {'#' : RegExp(r'[0-9]')}
+  );
+  var _loading = false;
+  Endereco? _cep;
   final formKey = GlobalKey<FormState>();
   final descricaoController = TextEditingController();
   final nomeController = TextEditingController();
   final inclusaoController = TextEditingController();
   final diferenciaisController = TextEditingController();
+  final cepController = TextEditingController();
   final _dateFormat = DateFormat('dd/MM/yyyy');
   Position? localizacaoAtual;
 
@@ -35,6 +46,7 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
       descricaoController.text = widget.pontoAtual!.descricao;
       diferenciaisController.text = widget.pontoAtual!.diferenciais;
       inclusaoController.text = widget.pontoAtual!.prazoFormatado;
+      cepController.text = widget.pontoAtual!.cep;
     }
 
   }
@@ -80,6 +92,31 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
               },
 
             ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: TextFormField(
+                controller: cepController,
+                decoration: InputDecoration(
+                  labelText: 'CEP',
+                  suffixIcon: _loading ? const Padding(
+                    padding: EdgeInsets.all(10),
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ) : IconButton(
+                    onPressed: _findCep,
+                    icon: const Icon(Icons.search),
+                  ),
+                ),
+                inputFormatters: [_cepFormater],
+                validator: (String? value){
+                  if(value == null || value.isEmpty){
+                    return 'Informe um cep válido!';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            Container(height: 10),
+            ..._buildWidgets(),
             Divider(color: Colors.white,),
             Row(
               children: [
@@ -106,8 +143,40 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
       diferenciais: diferenciaisController.text,
       dataInclusao: DateTime.now(),
       latitude: '',
-      longitude: ''
+      longitude: '',
+    cep: cepController.text,
   );
+  Future<void> _findCep() async {
+    if(formKey.currentState == null || !formKey.currentState!.validate()){
+      return;
+    }
+    setState(() {
+      _loading = true;
+    });
+    try{
+      _cep = await _service.findCepAsObject(_cepFormater.getUnmaskedText());
+    }catch(e){
+      debugPrint(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Ocorreu um erro, tente noavamente! \n'
+              'ERRO: ${e.toString()}')
+      ));
+    }
+    setState(() {
+      _loading = false;
+    });
+  }
+  List<Widget> _buildWidgets(){
+    final List<Widget> widgets = [];
+    if(_cep != null){
+      final map = _cep!.toJson();
+      for(final key in map.keys){
+        widgets.add(Text('$key:  ${map[key]}'));
+
+      }
+    }
+    return widgets;
+  }
 
 
 }

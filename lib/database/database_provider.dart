@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseProvider {
   static const _dbName = 'cadastro_tarefas.db';
-  static const _dbVersion = 2;
+  static const _dbVersion = 1;
 
 
   DatabaseProvider._init();
@@ -39,10 +39,11 @@ class DatabaseProvider {
         ${Tarefa.CAMPO_DIFERENCIAIS} TEXT,
         ${Tarefa.CAMPO_INCLUSAO} TEXT,
         ${Tarefa.CAMPO_LATITUDE} REAL,
-        ${Tarefa.CAMPO_LONGITUDE} REAL
+        ${Tarefa.CAMPO_LONGITUDE} REAL,
+        ${Tarefa.CAMPO_CEP} TEXT
       );
     ''');
-///
+    ///
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -59,6 +60,3 @@ class DatabaseProvider {
 
 }
 ///fim
-
-
-

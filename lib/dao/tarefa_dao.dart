@@ -60,7 +60,8 @@ class TarefaDao {
         Tarefa.CAMPO_DIFERENCIAIS,
         Tarefa.CAMPO_INCLUSAO,
         Tarefa.CAMPO_LATITUDE,
-        Tarefa.CAMPO_LONGITUDE
+        Tarefa.CAMPO_LONGITUDE,
+        Tarefa.CAMPO_CEP
       ],
 
       where: where,
@@ -71,5 +72,4 @@ class TarefaDao {
 
 }
 ///fim
-
 

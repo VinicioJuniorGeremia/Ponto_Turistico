@@ -17,7 +17,8 @@ class _FiltroPageState extends State<FiltroPage>{
   final _camposParaOrdenacao = {
     Tarefa.CAMPO_ID : "Código",
     Tarefa.CAMPO_DESCRICAO: "Descrição",
-    Tarefa.CAMPO_INCLUSAO: "Inclusão"
+    Tarefa.CAMPO_INCLUSAO: "Inclusão",
+    Tarefa.CAMPO_CEP: "Cep"
   };
 
   late final SharedPreferences _prefs;

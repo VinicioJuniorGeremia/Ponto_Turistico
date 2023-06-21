@@ -4,6 +4,7 @@ import '../model/tarefa.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gerenciador_tarefas_md/pages/mapa_interno.dart';
+import 'mapa_interno.dart';
 
 
 class DetalhestarefaPage extends StatefulWidget {
@@ -80,6 +81,12 @@ class _DetalhestarefaPageState extends State<DetalhestarefaPage> {
             Valor(valor: widget.tarefa.longitude),
           ],
         ),
+        Row(
+          children: [
+            Campo(descricao: 'Cep: '),
+            Valor(valor: widget.tarefa.cep),
+          ],
+        ),
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -123,7 +130,7 @@ class _DetalhestarefaPageState extends State<DetalhestarefaPage> {
             Container(
               decoration: BoxDecoration(
                 border: Border.all(),
-                borderRadius: BorderRadius.circular(8), // Define um raio de borda para deixar os cantos arredondados
+                borderRadius: BorderRadius.circular(8), // Define a borda para deixar os cantos arredondados
               ),
               child: Padding(
                 padding: EdgeInsets.all(8),
